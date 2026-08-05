@@ -1,0 +1,1709 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบคลังสื่อ Ultimate V.17 (Toggle View + Badge + Footer Credit)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dashjs@latest/dist/dash.all.min.js"></script>
+    <style>
+        /* ===== CSS พื้นฐาน ===== */
+        video::-webkit-media-controls-enclosure {
+            opacity: 0 !important;
+            transition: opacity 0.3s ease !important;
+            height: 32px !important;
+            padding: 0 12px !important;
+            width: 60% !important;
+            left: 20% !important;
+            right: 20% !important;
+            border-radius: 16px !important;
+            bottom: 16px !important;
+            background: rgba(0, 0, 0, 0.6) !important;
+        }
+        video:hover::-webkit-media-controls-enclosure { opacity: 1 !important; }
+        video::-webkit-media-controls-play-button { transform: scale(0.8) !important; }
+        video::-webkit-media-controls-timeline { height: 3px !important; }
+        video::-webkit-media-controls-timeline::-webkit-slider-thumb { width: 10px !important; height: 10px !important; }
+        video::-webkit-media-controls-volume-slider { min-width: 40px !important; max-width: 60px !important; }
+        video::-webkit-media-controls-mute-button { transform: scale(0.8) !important; }
+        video::-moz-media-controls {
+            opacity: 0 !important;
+            transition: opacity 0.3s ease !important;
+            height: 32px !important;
+            padding: 0 12px !important;
+            width: 60% !important;
+            margin: 0 auto !important;
+            border-radius: 16px !important;
+            bottom: 16px !important;
+            background: rgba(0, 0, 0, 0.6) !important;
+        }
+        video:hover::-moz-media-controls { opacity: 1 !important; }
+
+        * { box-sizing: border-box; font-family: 'Prompt', sans-serif !important; }
+        body { background: #eef2f5; margin: 0; padding: 20px; }
+        .main-workspace { display: flex; gap: 25px; max-width: 1750px; margin: 0 auto; }
+        .control-panel { width: 45%; background: #fff; padding: 25px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.06); }
+        .preview-panel { width: 55%; background: #fff; padding: 25px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.06); display: flex; flex-direction: column; gap: 15px; }
+        h2, h3 { color: #2c3e50; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; margin-top: 0; }
+        .slot-manager-box { background: #edf2f7; border: 2px solid #cbd5e0; padding: 15px; border-radius: 10px; margin-bottom: 15px; }
+        .slot-container { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; }
+        .dynamic-slot { display: flex; background: #fff; border: 2px solid #cbd5e0; border-radius: 6px; overflow: hidden; transition: all 0.2s; }
+        .dynamic-slot.active { border-color: #3182ce; box-shadow: 0 0 8px rgba(49,130,206,0.4); }
+        .slot-select-btn { background: transparent; border: none; padding: 8px 12px; cursor: pointer; font-weight: 500; font-size: 13px; }
+        .dynamic-slot.active .slot-select-btn { background: #3182ce; color: #fff; }
+        .slot-action-btn { background: #f7fafc; border: none; border-left: 1px solid #e2e8f0; padding: 8px 6px; cursor: pointer; font-size: 11px; }
+        .add-slot-btn { background: #48bb78; color: #fff; border: none; padding: 8px 14px; border-radius: 6px; font-size: 13px; font-weight: bold; cursor: pointer; }
+        .add-slot-btn:hover { background: #38a169; }
+        .key-section { background: #fffaf0; border: 1px solid #feebc8; padding: 12px; border-radius: 8px; margin-bottom: 15px; }
+        .theme-section { background: #f0fff4; border: 1px solid #c6f6d5; padding: 15px; border-radius: 8px; margin-bottom: 15px; }
+        .input-form-box { background: #f7fafc; border: 1px solid #cbd5e0; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+        .radio-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 6px; margin-bottom: 12px; }
+        .radio-label { display: flex; align-items: center; font-weight: bold; cursor: pointer; background: #fff; padding: 6px 4px; border-radius: 6px; border: 1px solid #cbd5e0; font-size: 10px; justify-content: center; }
+        .radio-label input { margin-right: 3px; }
+        .form-group { margin-bottom: 10px; }
+        .form-group.disabled { opacity: 0.3; pointer-events: none; }
+        label { display: block; font-weight: 600; margin-bottom: 4px; font-size: 13px; }
+        input[type="text"], input[type="number"] { width: 100%; padding: 8px 10px; border: 1px solid #cbd5e0; border-radius: 6px; box-sizing: border-box; font-size: 13px; }
+        .badge-customize-group { display: flex; gap: 10px; margin-bottom: 12px; background: #edf2f7; padding: 10px; border-radius: 6px; border: 1px solid #cbd5e0; align-items: flex-end; }
+        .badge-customize-item { flex: 1; }
+        .color-input-wrapper { display: flex; align-items: center; gap: 6px; background: #fff; padding: 5px 8px; border-radius: 6px; border: 1px solid #cbd5e0; height: 38px; }
+        input[type="color"] { border: none; width: 26px; height: 26px; border-radius: 4px; cursor: pointer; padding: 0; background: transparent; }
+        .playlist-management-header { display: flex; justify-content: space-between; align-items: center; margin: 20px 0 10px; }
+        .playlist-management-title { font-weight: bold; font-size: 15px; color: #2b6cb0; }
+        .clear-playlist-btn { background: #fff5f5; color: #c53030; border: 1px solid #fed7d7; padding: 4px 8px; border-radius: 4px; font-size: 12px; cursor: pointer; }
+        .clear-playlist-btn:hover { background: #fed7d7; }
+        .backend-search-wrapper { margin-bottom: 8px; }
+        .backend-search-input { width: 100%; padding: 6px 10px; border: 1px solid #cbd5e0; border-radius: 6px; font-size: 12px; box-sizing: border-box; }
+        .storage-bar { background: #edf2f7; border-radius: 8px; padding: 10px; margin: 10px 0; }
+        .storage-bar .row { display: flex; justify-content: space-between; font-size: 12px; color: #4a5568; }
+        .storage-bar .track { width: 100%; height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden; margin-top: 4px; }
+        .storage-bar .track .fill { height: 100%; width: 0%; border-radius: 4px; transition: width 0.3s; background: linear-gradient(90deg, #48bb78, #38a169); }
+        .storage-bar .info { display: flex; justify-content: space-between; font-size: 10px; color: #a0aec0; margin-top: 2px; }
+        .storage-bar .warning { display: none; background: #fed7d7; color: #9b2c2c; padding: 6px 10px; border-radius: 4px; font-size: 12px; margin-top: 6px; font-weight: bold; }
+        .visual-playlist { max-height: 350px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 8px; background: #edf2f7; padding: 10px; display: flex; flex-direction: column; gap: 8px; margin-bottom: 15px; }
+        .visual-playlist::-webkit-scrollbar { width: 7px; }
+        .visual-playlist::-webkit-scrollbar-thumb { background: #bdd7bd; border-radius: 20px; }
+        .visual-item { background: #fff; padding: 10px; border-radius: 6px; border-left: 5px solid #4299e1; box-shadow: 0 2px 4px rgba(0,0,0,0.04); display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+        .visual-item-info { flex: 1; display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+        .visual-item-title-input { font-weight: bold; border: none; background: transparent; padding: 2px 0; font-size: 13px; border-bottom: 1px dashed transparent; width: 100%; }
+        .visual-item-title-input:focus { border-bottom-color: #4299e1; outline: none; background: #f7fafc; }
+        .visual-item-url-input { font-size: 11px; color: #718096; border: none; background: transparent; padding: 2px 0; width: 100%; }
+        .visual-item-url-input:focus { outline: none; background: #f7fafc; }
+        .visual-item-badge { font-size: 10px; padding: 2px 6px; border-radius: 4px; color: #fff; font-weight: bold; width: fit-content; }
+        .inline-badge-editor { display: flex; align-items: center; gap: 5px; margin-top: 2px; }
+        .inline-badge-text-input { font-size: 10px; padding: 2px 4px; border: 1px solid #cbd5e0; border-radius: 4px; width: 90px; font-weight: bold; }
+        .action-controls { display: flex; gap: 4px; align-items: center; flex-wrap: wrap; }
+        .action-btn { background: #edf2f7; border: 1px solid #cbd5e0; padding: 4px 6px; border-radius: 4px; cursor: pointer; font-size: 11px; }
+        .move-btn { background: #ebf8ff; color: #2b6cb0; border-color: #bee3f8; }
+        .move-btn:hover { background: #bee3f8; }
+        .delete-btn { background: #fed7d7; color: #9b2c2c; border-color: #feb2b2; font-weight: bold; }
+        .delete-btn:hover { background: #feb2b2; }
+        .btn-group { display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap; }
+        button.main-btn { color: #fff; padding: 10px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: bold; flex: 1; min-width: 80px; }
+        .add-btn { background: #4299e1; flex: 2; }
+        .add-btn:hover { background: #3182ce; }
+        .save-tpl-btn { background: #2b6cb0; }
+        .save-tpl-btn:hover { background: #2c5282; }
+        .import-btn { background: #dd6b20; }
+        .import-btn:hover { background: #c05621; }
+        .csv-btn { background: #38a169; }
+        .csv-btn:hover { background: #2f855a; }
+        .template-io-box { background: #fffaf0; border: 2px dashed #dd6b20; padding: 15px; border-radius: 8px; margin-top: 15px; }
+        .backup-textarea { width: 100%; height: 70px; padding: 8px; font-family: monospace; font-size: 11px; border-radius: 6px; border: 1px solid #cbd5e0; resize: none; box-sizing: border-box; margin-bottom: 8px; }
+        textarea.code-output { width: 100%; height: 550px; padding: 12px; border: 1px solid #cbd5e0; border-radius: 6px; box-sizing: border-box; font-family: 'Courier New',monospace; font-size: 12px; background: #f7fafc; resize: vertical; }
+        .btn-panel-group { display: flex; flex-direction: column; gap: 8px; }
+        .copy-btn { background: #48bb78; width: 100%; font-size: 15px; padding: 12px; color: #fff; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
+        .copy-btn:hover { background: #38a169; }
+        .alert { display: none; padding: 10px; background: #c6f6d5; color: #22543d; border-radius: 6px; text-align: center; font-weight: bold; }
+        .import-status { display: none; background: #ebf8ff; color: #2b6cb0; padding: 8px; border-radius: 6px; font-size: 13px; margin-top: 6px; text-align: center; }
+        .count-badge { background: #3182ce; color: #fff; border-radius: 12px; padding: 2px 10px; font-size: 12px; margin-left: 8px; }
+
+        /* ===== CSS สำหรับปุ่มสลับโหมด ===== */
+        .view-toggle-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            background: #f0f9f0;
+            border-bottom: 1px solid #d2e4d2;
+        }
+        .view-toggle-bar .title {
+            font-size: 13px;
+            font-weight: bold;
+            color: #2b6cb0;
+        }
+        .view-toggle-btn {
+            background: #4299e1;
+            color: #fff;
+            border: none;
+            padding: 4px 14px;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+        .view-toggle-btn:hover { opacity: 0.85; }
+        .view-toggle-btn.text-mode { background: #38a169; }
+        .view-toggle-btn.image-mode { background: #4299e1; }
+
+        /* ===== โหมดภาพ (ค่าเริ่มต้น) ===== */
+        .playlist.image-mode .item .item-thumb { display: block !important; }
+        .playlist.image-mode .item .item-sub { display: block !important; }
+        .playlist.image-mode .item .badge { display: inline-block !important; }
+        .playlist.image-mode .item { gap: 12px !important; padding: 10px 12px !important; }
+
+        /* ===== โหมดข้อความ (แบบมี ▶ และป้ายสี) ===== */
+        .playlist.text-mode .item .item-thumb { display: none !important; }
+        .playlist.text-mode .item .item-sub { display: none !important; }
+        .playlist.text-mode .item { 
+            gap: 8px !important; 
+            padding: 8px 14px !important; 
+            border-bottom: 1px solid #e8e8e8 !important;
+        }
+        .playlist.text-mode .item .item-text { 
+            font-size: 14px !important; 
+            font-weight: 500 !important;
+            flex: 1 !important;
+        }
+        .playlist.text-mode .item .badge { 
+            display: inline-block !important; 
+            flex-shrink: 0 !important;
+            margin-left: auto !important;
+            font-size: 11px !important;
+            padding: 2px 12px !important;
+            border-radius: 20px !important;
+            font-weight: 700 !important;
+            letter-spacing: 0.5px !important;
+        }
+        .playlist.text-mode .item .item-text::before {
+            content: "▶ ";
+            color: #333;
+            font-size: 11px;
+        }
+        .playlist.text-mode .item:not(:last-child) {
+            border-bottom: 1px solid #e8e8e8 !important;
+        }
+        .playlist.text-mode .item:hover {
+            background: #e8f0e8 !important;
+        }
+        .dark-mode .playlist.text-mode .item {
+            border-bottom-color: #2e3b2e !important;
+        }
+        .dark-mode .playlist.text-mode .item:hover {
+            background: #253525 !important;
+        }
+
+        /* ===== CSS สำหรับ Footer ===== */
+        .footer-credit {
+            text-align: center;
+            padding: 16px 20px;
+            font-size: 13px;
+            color: #4a5568;
+            border-top: 2px solid #d4af37;
+            background: linear-gradient(135deg, #f7fafc, #edf2f7);
+            margin-top: 10px;
+            border-radius: 0 0 14px 14px;
+        }
+        .dark-mode .footer-credit {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            color: #a0aec0;
+            border-top-color: #d4af37;
+        }
+
+        /* ===== CSS สำหรับ Image Viewer ===== */
+        #imageViewer {
+            display: none;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            flex-direction: column;
+        }
+        #imageDisplay {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            cursor: pointer;
+            display: none;
+        }
+        #imageLoading {
+            color: #fff;
+            font-size: 20px;
+            z-index: 10;
+            position: absolute;
+        }
+        #imageError {
+            display: none;
+            color: #f88;
+            font-size: 16px;
+            text-align: center;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="main-workspace">
+
+    <div class="control-panel">
+        <h2>🛠️ ระบบคลังสื่อ Ultimate V.17 (Toggle View + Badge + Footer Credit)</h2>
+        
+        <div class="slot-manager-box">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <label style="color:#2b6cb0;font-size:14px;">🗂️ เลือกคลังวิชา:</label>
+                <button class="add-slot-btn" onclick="createNewSlot()">➕ เพิ่มคลังวิชาใหม่</button>
+            </div>
+            <div class="slot-container" id="slotContainer"></div>
+        </div>
+
+        <div class="theme-section" style="background:#f7f0ff;border-color:#e8d5f5;">
+            <label style="color:#6b21a8;font-size:14px;">✍️ ข้อมูลผู้จัดทำ:</label>
+            <div class="form-group"><label for="teacherName">👤 ชื่อ-นามสกุล</label><input type="text" id="teacherName" value="นายณัฐพล มีเวที" onchange="saveConfig()"></div>
+            <div class="form-group"><label for="schoolName">🏫 ชื่อโรงเรียน</label><input type="text" id="schoolName" value="โรงเรียนบ้านหนองม่วง" onchange="saveConfig()"></div>
+            <div class="form-group"><label for="areaName">🏢 สำนักงานเขตพื้นที่</label><input type="text" id="areaName" value="สำนักงานเขตพื้นที่การศึกษาประถมศึกษาบุรีรัมย์ เขต 2" onchange="saveConfig()"></div>
+        </div>
+        
+        <div class="key-section">
+            <label for="apiKey" style="color:#dd6b20;">🔑 Google API Key</label>
+            <input type="text" id="apiKey" placeholder="AIzaSy..." onchange="saveConfig()">
+        </div>
+
+        <div class="theme-section">
+            <label style="color:#22543d;font-size:14px;">🎨 ตกแต่งส่วนหัว:</label>
+            <div class="form-group"><label for="schoolLogoUrl">🔗 ลิงก์โลโก้</label><input type="text" id="schoolLogoUrl" placeholder="https://...png" onchange="saveConfig()"></div>
+            <div class="form-group"><label for="headerBgUrl">🔗 รูปพื้นหลังส่วนหัว</label><input type="text" id="headerBgUrl" placeholder="https://...jpg" onchange="saveConfig()"></div>
+        </div>
+
+        <div class="input-form-box">
+            <label style="color:#2b6cb0;font-size:14px;">➕ เพิ่มสื่อใหม่:</label>
+            <div class="radio-grid">
+                <label class="radio-label"><input type="radio" name="formatType" value="video" checked onchange="toggleInputs()"> VDO</label>
+                <label class="radio-label" style="color:#e67e22;"><input type="radio" name="formatType" value="hls" onchange="toggleInputs()"> 🎬 Live</label>
+                <label class="radio-label"><input type="radio" name="formatType" value="youtube" onchange="toggleInputs()"> YouTube</label>
+                <label class="radio-label"><input type="radio" name="formatType" value="audio" onchange="toggleInputs()"> MP3</label>
+                <label class="radio-label"><input type="radio" name="formatType" value="pdf" onchange="toggleInputs()"> PDF</label>
+                <label class="radio-label"><input type="radio" name="formatType" value="slide" onchange="toggleInputs()"> Slide</label>
+                <label class="radio-label"><input type="radio" name="formatType" value="html" onchange="toggleInputs()"> HTML</label>
+                <label class="radio-label" style="color:#8e44ad;"><input type="radio" name="formatType" value="image" onchange="toggleInputs()"> 🖼️ Image</label>
+            </div>
+            
+            <div class="badge-customize-group">
+                <div class="badge-customize-item" style="flex:2;">
+                    <label style="font-size:12px;">✏️ ข้อความป้าย:</label>
+                    <input type="text" id="customBadgeText" value="VDO" style="padding:6px 8px;font-weight:bold;width:100%;">
+                </div>
+                <div class="badge-customize-item" style="flex:1.2;">
+                    <label style="font-size:12px;">🎨 สีป้าย:</label>
+                    <div class="color-input-wrapper">
+                        <input type="color" id="badgeColorPicker" value="#e53935">
+                        <span id="colorHexText" style="font-family:monospace;font-size:11px;">#E53935</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label id="labelPos1">ลิงก์สื่อหลัก</label>
+                <input type="text" id="pos1" placeholder="วางลิงก์ที่นี่">
+            </div>
+            <div class="form-group" id="groupPos2">
+                <label id="labelPos2">🖼️ ลิงก์รูปปก (Poster)</label>
+                <input type="text" id="pos2" placeholder="https://...jpg">
+            </div>
+            <div class="form-group">
+                <label for="posAttachment">🔗 ลิงก์ไฟล์แนบ (ใบงาน)</label>
+                <input type="text" id="posAttachment" placeholder="https://... (เว้นว่างได้)">
+            </div>
+            <div class="form-group">
+                <label for="posAttachmentLabel">✏️ ชื่อปุ่มไฟล์แนบ</label>
+                <input type="text" id="posAttachmentLabel" value="ใบงาน/แบบทดสอบ" placeholder="เว้นว่างได้ (จะแสดง 'เปิดดู')">
+            </div>
+            <div class="form-group">
+                <label for="pos3">ชื่อวิชา / บทเรียน</label>
+                <input type="text" id="pos3" placeholder="เช่น วิชาคอมพิวเตอร์ ป.5">
+            </div>
+            <div class="form-group" style="background:#ebf8ff;padding:10px;border-radius:6px;border:1px solid #bee3f8;">
+                <label for="targetIndexInput" style="color:#2b6cb0;">🎯 แทรกตำแหน่ง (เว้นว่างไว้ท้ายสุด)</label>
+                <input type="number" id="targetIndexInput" min="1" placeholder="เช่น 1, 2, 5">
+            </div>
+            <div class="btn-group">
+                <button class="main-btn add-btn" onclick="addNewItem()">➕ เพิ่มเข้าสู่เพลย์ลิสต์</button>
+            </div>
+        </div>
+
+        <div class="playlist-management-header">
+            <div class="playlist-management-title">🗂️ รายการสื่อใน: <span id="lblCurrentSlotName" style="color:#e53e3e;">คลังเริ่มต้น</span> <span class="count-badge" id="itemCountBadge">0</span></div>
+            <button class="clear-playlist-btn" onclick="clearAll()">🗑️ ล้างรายการ</button>
+        </div>
+        
+        <div class="backend-search-wrapper">
+            <input type="text" id="backendSearchInput" class="backend-search-input" placeholder="🔍 ค้นหารายการ..." oninput="filterBackend()">
+        </div>
+
+        <div class="storage-bar">
+            <div class="row">
+                <span>💾 หน่วยความจำที่ใช้</span>
+                <span id="storagePercent">0%</span>
+            </div>
+            <div class="track">
+                <div class="fill" id="storageProgress"></div>
+            </div>
+            <div class="info">
+                <span id="storageUsed">0 KB</span>
+                <span id="storageTotal">~5 MB</span>
+            </div>
+            <div class="warning" id="storageWarning">⚠️ ใกล้เต็มหน่วยความจำ! กรุณาส่งออกข้อมูลและล้างบางรายการ</div>
+        </div>
+        
+        <div class="visual-playlist" id="visualPlaylist"></div>
+
+        <div class="template-io-box">
+            <label style="color:#c05621;font-weight:bold;font-size:13px;">💾 ส่งออก / นำเข้า:</label>
+            <p style="margin:2px 0 8px 0;font-size:11px;color:#718096;">
+                📌 วางรหัสกู้คืน (Base64) หรือ CSV ที่ส่งออกมา แก้ไขแล้วนำเข้ากลับได้<br>
+                💡 <b>ไฟล์แนบเว้นว่างได้</b> ระบบจะใช้ลิงก์สื่อแทน
+            </p>
+            <textarea id="txtBackupBox" class="backup-textarea" placeholder="วางรหัสกู้คืน หรือ CSV ที่นี่..."></textarea>
+            <div id="importStatus" class="import-status">⏳ กำลังนำเข้า... กรุณารอสักครู่</div>
+            <div class="btn-group">
+                <button class="main-btn save-tpl-btn" onclick="exportData()">📤 ส่งออก Base64</button>
+                <button class="main-btn csv-btn" onclick="exportCSV()">📄 ส่งออก CSV</button>
+                <button class="main-btn import-btn" onclick="importData()">📥 นำเข้า</button>
+            </div>
+            <div style="margin-top:8px;font-size:11px;color:#718096;text-align:center;">
+                💡 CSV มี 8 คอลัมน์: ประเภท,ชื่อ,ลิงก์,ปก,ไฟล์แนบ,ป้าย,สี,ชื่อปุ่มแนบ<br>
+                <b>ถ้าไฟล์แนบว่าง</b> ปุ่มจะใช้ลิงก์สื่อแทน
+            </div>
+        </div>
+    </div>
+
+    <div class="preview-panel">
+        <h3>📦 โค้ดสำหรับฝัง Google Sites</h3>
+        <textarea id="output" class="code-output" readonly onclick="this.select()" placeholder="โค้ดจะปรากฏที่นี่..."></textarea>
+        <div class="btn-panel-group">
+            <button class="copy-btn" onclick="copyCode()">📋 คัดลอกโค้ด</button>
+        </div>
+        <div class="alert" id="successAlert">✅ คัดลอกโค้ดเรียบร้อยแล้ว!</div>
+    </div>
+
+</div>
+
+<script>
+// ============================================================
+// COPIED FROM YOUR ORIGINAL FILE (unchanged)
+// ============================================================
+const defaultLabelConfig = {
+    video: { text: "VDO", color: "#e53935" },
+    hls: { text: "MOVIE STREAM", color: "#e67e22" },
+    stream: { text: "STREAM", color: "#e67e22" },
+    youtube: { text: "YOUTUBE", color: "#ff0000" },
+    audio: { text: "MP3", color: "#1e88e5" },
+    pdf: { text: "PDF", color: "#4CAF50" },
+    slide: { text: "SLIDE", color: "#fb8c00" },
+    html: { text: "HTML", color: "#00897B" },
+    image: { text: "IMAGE", color: "#8e44ad" }
+};
+
+let slotsConfig = [
+    { id: "slot_default_1", name: "วิชาคอมพิวเตอร์" },
+    { id: "slot_default_2", name: "คลังภาพยนตร์" }
+];
+let currentActiveSlotId = 'slot_default_1';
+let playlistArray = [];
+let isImporting = false;
+let isRendering = false;
+
+window.onload = function() {
+    ['apiKey','schoolLogoUrl','headerBgUrl','teacherName','schoolName','areaName'].forEach(id => {
+        if(localStorage.getItem(id)) document.getElementById(id).value = localStorage.getItem(id);
+    });
+    const saved = localStorage.getItem('slotsConfig');
+    if(saved) slotsConfig = JSON.parse(saved);
+    const last = localStorage.getItem('lastActiveSlot');
+    if(last && slotsConfig.some(s => s.id === last)) currentActiveSlotId = last;
+    renderSlots();
+    loadPlaylist(currentActiveSlotId);
+    document.getElementById('badgeColorPicker').addEventListener('input', function(e) {
+        document.getElementById('colorHexText').innerText = e.target.value.toUpperCase();
+    });
+    toggleInputs();
+    setTimeout(updateStorageProgress, 500);
+};
+
+function createNewSlot() {
+    const name = prompt("กรุณากรอกชื่อคลังวิชา:");
+    if(!name || !name.trim()) return;
+    const newId = "slot_" + Date.now();
+    slotsConfig.push({ id: newId, name: name.trim() });
+    saveSlots();
+    renderSlots();
+    switchSlot(newId);
+}
+
+function editSlotName(id, e) {
+    e.stopPropagation();
+    const slot = slotsConfig.find(s => s.id === id);
+    if(!slot) return;
+    const newName = prompt("แก้ไขชื่อคลังวิชา:", slot.name);
+    if(!newName || !newName.trim()) return;
+    slot.name = newName.trim();
+    saveSlots();
+    renderSlots();
+    if(currentActiveSlotId === id) {
+        document.getElementById('lblCurrentSlotName').innerText = slot.name;
+        renderPlaylist();
+    }
+}
+
+function deleteSlot(id, e) {
+    e.stopPropagation();
+    if(slotsConfig.length <= 1) { alert("ต้องมีคลังอย่างน้อย 1 คลัง"); return; }
+    const slot = slotsConfig.find(s => s.id === id);
+    if(!confirm(`ลบคลัง "${slot.name}"?`)) return;
+    slotsConfig = slotsConfig.filter(s => s.id !== id);
+    localStorage.removeItem('playlist_' + id);
+    saveSlots();
+    if(currentActiveSlotId === id) currentActiveSlotId = slotsConfig[0].id;
+    renderSlots();
+    switchSlot(currentActiveSlotId);
+}
+
+function saveSlots() {
+    localStorage.setItem('slotsConfig', JSON.stringify(slotsConfig));
+    localStorage.setItem('lastActiveSlot', currentActiveSlotId);
+}
+
+function renderSlots() {
+    const container = document.getElementById('slotContainer');
+    container.innerHTML = "";
+    slotsConfig.forEach(slot => {
+        const isActive = slot.id === currentActiveSlotId;
+        const div = document.createElement('div');
+        div.className = `dynamic-slot ${isActive ? 'active' : ''}`;
+        div.innerHTML = `
+            <button class="slot-select-btn" onclick="switchSlot('${slot.id}')">${slot.name}</button>
+            <button class="slot-action-btn" onclick="editSlotName('${slot.id}', event)">✏️</button>
+            <button class="slot-action-btn" style="color:#c53030;" onclick="deleteSlot('${slot.id}', event)">❌</button>
+        `;
+        container.appendChild(div);
+    });
+}
+
+function switchSlot(id) {
+    currentActiveSlotId = id;
+    localStorage.setItem('lastActiveSlot', id);
+    renderSlots();
+    const slot = slotsConfig.find(s => s.id === id);
+    document.getElementById('lblCurrentSlotName').innerText = slot ? slot.name : "คลังสื่อ";
+    document.getElementById('backendSearchInput').value = "";
+    loadPlaylist(id);
+}
+
+function loadPlaylist(id) {
+    playlistArray = [];
+    const key = 'playlist_' + id;
+    const chunks = parseInt(localStorage.getItem(key + '_chunks') || '0');
+    if(chunks > 0) {
+        for(let i = 0; i < chunks; i++) {
+            const mainChunk = localStorage.getItem(key + '_chunk_' + i);
+            if(mainChunk) {
+                try { playlistArray = playlistArray.concat(JSON.parse(mainChunk)); } catch(e) {}
+            } else {
+                let j = 0;
+                while(true) {
+                    const subChunk = localStorage.getItem(key + '_chunk_' + i + '_' + j);
+                    if(!subChunk) break;
+                    try { playlistArray = playlistArray.concat(JSON.parse(subChunk)); } catch(e) {}
+                    j += 10;
+                }
+            }
+        }
+    } else {
+        const data = localStorage.getItem(key);
+        if(data) {
+            try { playlistArray = JSON.parse(data); } catch(e) { playlistArray = []; }
+        }
+    }
+    renderPlaylist();
+}
+
+function savePlaylist() {
+    const key = 'playlist_' + currentActiveSlotId;
+    try {
+        const jsonStr = JSON.stringify(playlistArray);
+        if(jsonStr.length < 2000000) {
+            localStorage.setItem(key, jsonStr);
+            const oldChunks = parseInt(localStorage.getItem(key + '_chunks') || '0');
+            for(let i = 0; i < oldChunks; i++) {
+                localStorage.removeItem(key + '_chunk_' + i);
+            }
+            localStorage.removeItem(key + '_chunks');
+        } else {
+            const chunkSize = 30;
+            const chunks = Math.ceil(playlistArray.length / chunkSize);
+            for(let i = 0; i < chunks; i++) {
+                const chunk = playlistArray.slice(i * chunkSize, (i + 1) * chunkSize);
+                localStorage.setItem(key + '_chunk_' + i, JSON.stringify(chunk));
+            }
+            localStorage.setItem(key + '_chunks', chunks);
+            localStorage.removeItem(key);
+        }
+    } catch(e) {
+        const chunkSize = 20;
+        const chunks = Math.ceil(playlistArray.length / chunkSize);
+        for(let i = 0; i < chunks; i++) {
+            const chunk = playlistArray.slice(i * chunkSize, (i + 1) * chunkSize);
+            try {
+                localStorage.setItem(key + '_chunk_' + i, JSON.stringify(chunk));
+            } catch(err) {
+                const subChunkSize = 10;
+                for(let j = 0; j < chunk.length; j += subChunkSize) {
+                    const subChunk = chunk.slice(j, j + subChunkSize);
+                    try {
+                        localStorage.setItem(key + '_chunk_' + i + '_' + j, JSON.stringify(subChunk));
+                    } catch(err2) {
+                        alert('⚠️ หน่วยความจำเต็ม! กรุณาส่งออกข้อมูลและล้างบางรายการ');
+                    }
+                }
+            }
+        }
+        localStorage.setItem(key + '_chunks', chunks);
+        localStorage.removeItem(key);
+    }
+    updateStorageProgress();
+}
+
+let currentPage = 0;
+const ITEMS_PER_PAGE = 30;
+
+function renderPlaylist() {
+    if(isRendering) return;
+    isRendering = true;
+    savePlaylist();
+    const container = document.getElementById('visualPlaylist');
+    container.innerHTML = "";
+    if(playlistArray.length === 0) {
+        container.innerHTML = `<div style="text-align:center;padding:20px;color:#a0aec0;font-size:13px;">❌ ยังไม่มีรายการสื่อ</div>`;
+        document.getElementById('output').value = "";
+        document.getElementById('itemCountBadge').textContent = "0";
+        isRendering = false;
+        return;
+    }
+    document.getElementById('itemCountBadge').textContent = playlistArray.length;
+    const apiKey = document.getElementById('apiKey').value.trim();
+    let itemsHTML = "";
+    let embedItemsHTML = "";
+    const totalPages = Math.ceil(playlistArray.length / ITEMS_PER_PAGE);
+    if (currentPage >= totalPages) currentPage = totalPages - 1;
+    if (currentPage < 0) currentPage = 0;
+    const start = currentPage * ITEMS_PER_PAGE;
+    const end = Math.min(start + ITEMS_PER_PAGE, playlistArray.length);
+    const pageItems = playlistArray.slice(start, end);
+
+    pageItems.forEach((item, idx) => {
+        const index = start + idx;
+        const label = item.label || item.type.toUpperCase();
+        const color = item.color || "#333";
+        const isFirst = index === 0;
+        const isLast = index === playlistArray.length - 1;
+        const attachment = item.attachment || "";
+        const attLabel = (item.attachmentLabel && item.attachmentLabel.trim() !== "") ? item.attachmentLabel : "เปิดดู";
+        itemsHTML += `
+            <div class="visual-item" data-index="${index}">
+                <div class="visual-item-info">
+                    <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+                        <span style="font-weight:bold;font-size:13px;color:#4a5568;">${index+1}.</span>
+                        <input class="visual-item-title-input" value="${escapeHtml(item.title)}" data-index="${index}" data-field="title" style="flex:1;min-width:80px;">
+                        <div style="display:flex;gap:2px;margin-left:auto;">
+                            <button class="action-btn move-btn" onclick="moveItem(${index},'up')" ${isFirst ? 'disabled style="opacity:0.3;"' : ''}>⬆️</button>
+                            <button class="action-btn move-btn" onclick="moveItem(${index},'down')" ${isLast ? 'disabled style="opacity:0.3;"' : ''}>⬇️</button>
+                            <button class="action-btn move-btn" onclick="moveItem(${index},'top')" ${isFirst ? 'disabled style="opacity:0.3;"' : ''}>🔝</button>
+                            <button class="action-btn move-btn" onclick="moveItem(${index},'bottom')" ${isLast ? 'disabled style="opacity:0.3;"' : ''}>🔚</button>
+                        </div>
+                    </div>
+                    <input class="visual-item-url-input" value="${escapeHtml(item.src)}" placeholder="ลิงก์สื่อหลัก" data-index="${index}" data-field="src">
+                    <input class="visual-item-url-input" style="color:#4a5568;font-style:italic;" value="${escapeHtml(item.poster||'')}" placeholder="🖼️ รูปปก" data-index="${index}" data-field="poster">
+                    <input class="visual-item-url-input" style="color:#27ae60;border-top:1px dotted #e2e8f0;margin-top:2px;" value="${escapeHtml(attachment)}" placeholder="🔗 ไฟล์แนบ (เว้นว่างได้)" data-index="${index}" data-field="attachment">
+                    <input class="visual-item-url-input" style="color:#2b6cb0;" value="${escapeHtml(attLabel)}" placeholder="ชื่อปุ่มแนบ" data-index="${index}" data-field="attachmentLabel">
+                    <div class="inline-badge-editor">
+                        <span class="visual-item-badge" style="background:${color}">${escapeHtml(label)}</span>
+                        <input class="inline-badge-text-input" value="${escapeHtml(label)}" placeholder="ป้ายข้อความ" data-index="${index}" data-field="label">
+                        <input type="color" value="${color}" style="width:22px;height:22px;border-radius:4px;" data-index="${index}" data-field="color">
+                    </div>
+                </div>
+                <div class="action-controls">
+                    <button class="action-btn delete-btn" onclick="removeItem(${index})">🗑️</button>
+                </div>
+            </div>
+        `;
+        const finalSrc = processUrl(item.src, apiKey, item.type);
+        let posterUrl = item.poster;
+        if (item.type === 'image' && !posterUrl) {
+            posterUrl = item.src;
+        }
+        const posterAttr = posterUrl ? ` data-poster="${escapeHtml(posterUrl)}"` : "";
+        const attachUrl = attachment || finalSrc;
+        const attachAttr = ` data-attachment="${escapeHtml(attachUrl)}" data-attlabel="${escapeHtml(attLabel)}"`;
+        const mediaId = "id_" + index + "_" + Date.now();
+        const activeClass = index === 0 ? "item active" : "item";
+        let thumbImg = '';
+        if (item.type === 'image' && item.src) {
+            thumbImg = escapeHtml(item.src);
+        } else if (item.poster && item.poster.trim() !== '') {
+            thumbImg = escapeHtml(item.poster);
+        } else if (item.type === 'youtube' && item.src) {
+            const vid = extractYoutubeId(item.src);
+            thumbImg = vid ? `https://img.youtube.com/vi/${vid}/hqdefault.jpg` : 'https://cdn-icons-png.flaticon.com/512/1384/1384060.png';
+        } else {
+            const iconUrls = {
+                'video': 'https://res.cloudinary.com/dolokhnkm/image/upload/v1785845372/ChatGPT_Image_4_%E0%B8%AA.%E0%B8%84._2569_16_56_17_v2zkm4.png',
+                'hls': 'https://res.cloudinary.com/dolokhnkm/image/upload/v1785845374/ChatGPT_Image_4_%E0%B8%AA.%E0%B8%84._2569_16_53_42_vjzo1d.png',
+                'stream': 'https://res.cloudinary.com/dolokhnkm/image/upload/v1785845374/ChatGPT_Image_4_%E0%B8%AA.%E0%B8%84._2569_16_30_32_fnkral.png',
+                'audio': 'https://res.cloudinary.com/dolokhnkm/image/upload/v1785845377/Gemini_Generated_Image_wfx8vgwfx8vgwfx8_grdtia.png',
+                'pdf': 'https://res.cloudinary.com/dolokhnkm/image/upload/v1785845377/ChatGPT_Image_4_%E0%B8%AA.%E0%B8%84._2569_16_00_43_zesp37.png',
+                'html': 'https://res.cloudinary.com/dolokhnkm/image/upload/v1785845377/ChatGPT_Image_4_%E0%B8%AA.%E0%B8%84._2569_16_26_26_ah2sz8.png',
+                'slide': 'https://res.cloudinary.com/dolokhnkm/image/upload/v1785845378/ChatGPT_Image_4_%E0%B8%AA.%E0%B8%84._2569_16_03_12_gvyuly.png',
+                'image': 'https://cdn-icons-png.flaticon.com/512/2917/2917995.png'
+            };
+            thumbImg = iconUrls[item.type] || 'https://cdn-icons-png.flaticon.com/512/1384/1384060.png';
+        }
+        const subText = item.type === 'video' ? '🎬 วิดีโอ' :
+                        item.type === 'hls' ? '📡 สตรีมสด' :
+                        item.type === 'audio' ? '🎵 เสียง' :
+                        item.type === 'pdf' ? '📄 เอกสาร' :
+                        item.type === 'html' ? '🌐 เว็บเพจ' :
+                        item.type === 'youtube' ? '▶️ YouTube' :
+                        item.type === 'image' ? '🖼️ รูปภาพ' : '📁 สื่อ';
+        embedItemsHTML += `
+                <div class="${activeClass}" data-type="${item.type}" data-id="${mediaId}" data-src="${escapeHtml(finalSrc)}"${posterAttr}${attachAttr}>
+                    <img class="item-thumb" src="${thumbImg}" alt="thumbnail" loading="lazy" onerror="this.src='https://cdn-icons-png.flaticon.com/512/1384/1384060.png'">
+                    <div class="item-info">
+                        <span class="item-text">${index+1}. ${escapeHtml(item.title)}</span>
+                        <span class="item-sub">${subText}</span>
+                    </div>
+                    <span class="badge" style="background:${color};">${escapeHtml(label)}</span>
+                </div>
+`;
+    });
+
+    const paginationHTML = `
+        <div style="display:flex; justify-content:center; align-items:center; gap:12px; padding:12px 0; border-top:1px solid #ddd; flex-wrap:wrap;">
+            <button onclick="changePage(-1)" style="background:#1e88e5; color:#fff; border:none; padding:6px 16px; border-radius:6px; cursor:pointer; font-size:13px; ${currentPage === 0 ? 'opacity:0.4; pointer-events:none;' : ''}">◀ ก่อนหน้า</button>
+            <span style="font-size:14px; color:#333; font-weight:600;">หน้า ${currentPage + 1} / ${totalPages}</span>
+            <span style="font-size:12px; color:#888;">(${playlistArray.length} รายการ)</span>
+            <button onclick="changePage(1)" style="background:#1e88e5; color:#fff; border:none; padding:6px 16px; border-radius:6px; cursor:pointer; font-size:13px; ${currentPage === totalPages - 1 ? 'opacity:0.4; pointer-events:none;' : ''}">ถัดไป ▶</button>
+        </div>
+    `;
+    requestAnimationFrame(() => {
+        container.innerHTML = itemsHTML + paginationHTML;
+        container.querySelectorAll('.visual-item-title-input, .visual-item-url-input, .inline-badge-text-input, input[type="color"]').forEach(el => {
+            el.addEventListener('change', function() {
+                const index = parseInt(this.dataset.index);
+                const field = this.dataset.field;
+                if(!isNaN(index) && field) {
+                    updateItem(index, field, this.value);
+                }
+            });
+        });
+        const fullCode = generateFullCode(embedItemsHTML);
+        document.getElementById('output').value = fullCode;
+        filterBackend();
+        updateStorageProgress();
+        isRendering = false;
+        if(playlistArray.length > 100) {
+            const statusEl = document.getElementById('importStatus');
+            statusEl.style.display = 'block';
+            statusEl.style.background = '#fefcbf';
+            statusEl.style.color = '#975a16';
+            statusEl.textContent = `📊 มี ${playlistArray.length} รายการในคลังนี้ (แสดงหน้า ${currentPage+1}/${totalPages})`;
+            setTimeout(() => {
+                statusEl.style.display = 'none';
+            }, 4000);
+        }
+    });
+}
+
+function changePage(direction) {
+    const totalPages = Math.ceil(playlistArray.length / ITEMS_PER_PAGE);
+    const newPage = currentPage + direction;
+    if (newPage >= 0 && newPage < totalPages) {
+        currentPage = newPage;
+        renderPlaylist();
+    }
+}
+
+function addNewItem() {
+    const type = document.querySelector('input[name="formatType"]:checked').value;
+    let src = document.getElementById('pos1').value.trim();
+    const poster = document.getElementById('pos2').value.trim();
+    const attachment = document.getElementById('posAttachment').value.trim();
+    let attachmentLabel = document.getElementById('posAttachmentLabel').value.trim();
+    let title = document.getElementById('pos3').value.trim();
+    const label = document.getElementById('customBadgeText').value.trim() || type.toUpperCase();
+    const color = document.getElementById('badgeColorPicker').value;
+    const targetVal = document.getElementById('targetIndexInput').value.trim();
+
+    if (type === 'youtube' && src && !title) {
+        const vid = extractYoutubeId(src);
+        if (vid) {
+            fetch(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${vid}&format=json`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data && data.title) {
+                        document.getElementById('pos3').value = data.title;
+                        title = data.title;
+                    }
+                    performAddItem(type, src, poster, attachment, attachmentLabel, title, label, color, targetVal);
+                })
+                .catch(() => {
+                    performAddItem(type, src, poster, attachment, attachmentLabel, title, label, color, targetVal);
+                });
+            return;
+        }
+    }
+    performAddItem(type, src, poster, attachment, attachmentLabel, title, label, color, targetVal);
+}
+
+function performAddItem(type, src, poster, attachment, attachmentLabel, title, label, color, targetVal) {
+    if(!src || !title) { 
+        alert("กรุณากรอกลิงก์และชื่อเรื่อง"); 
+        return; 
+    }
+    if(!attachmentLabel) attachmentLabel = "เปิดดู";
+    src = cleanIframe(src);
+    const newItem = { type, title, src, poster, label, color, attachment, attachmentLabel };
+    if(targetVal !== "") {
+        let pos = parseInt(targetVal) - 1;
+        if(isNaN(pos) || pos < 0) pos = 0;
+        if(pos > playlistArray.length) pos = playlistArray.length;
+        playlistArray.splice(pos, 0, newItem);
+    } else {
+        playlistArray.push(newItem);
+    }
+    currentPage = 0;
+    renderPlaylist();
+    ['pos1','pos2','posAttachment','pos3','targetIndexInput'].forEach(id => {
+        document.getElementById(id).value = "";
+    });
+    document.getElementById('pos1').focus();
+}
+
+function updateItem(index, field, value) {
+    if(!playlistArray[index]) return;
+    if(field === 'src') value = cleanIframe(value);
+    playlistArray[index][field] = value;
+    renderPlaylist();
+}
+
+function removeItem(index) {
+    playlistArray.splice(index, 1);
+    const totalPages = Math.ceil(playlistArray.length / ITEMS_PER_PAGE);
+    if (currentPage >= totalPages) currentPage = Math.max(0, totalPages - 1);
+    renderPlaylist();
+}
+
+function moveItem(index, direction) {
+    if(direction === 'up' && index > 0) {
+        [playlistArray[index-1], playlistArray[index]] = [playlistArray[index], playlistArray[index-1]];
+    } else if(direction === 'down' && index < playlistArray.length - 1) {
+        [playlistArray[index], playlistArray[index+1]] = [playlistArray[index+1], playlistArray[index]];
+    } else if(direction === 'top' && index > 0) {
+        const item = playlistArray.splice(index, 1)[0];
+        playlistArray.unshift(item);
+    } else if(direction === 'bottom' && index < playlistArray.length - 1) {
+        const item = playlistArray.splice(index, 1)[0];
+        playlistArray.push(item);
+    }
+    renderPlaylist();
+}
+
+function clearAll() {
+    if(!confirm("ล้างรายการทั้งหมดในคลังนี้?")) return;
+    playlistArray = [];
+    currentPage = 0;
+    renderPlaylist();
+}
+
+function escapeHtml(text) {
+    if(!text) return "";
+    return text.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");
+}
+
+function cleanIframe(url) {
+    if(url && url.toLowerCase().includes('<iframe')) {
+        const match = url.match(/src="([^"]+)"/i);
+        if(match && match[1]) {
+            let clean = match[1];
+            if(clean.startsWith('//')) clean = 'https:' + clean;
+            return clean;
+        }
+    }
+    return url;
+}
+
+function extractYoutubeId(url) {
+    if(url.includes('shorts/')) return url.split('shorts/')[1].split(/[?#&]/)[0];
+    if(url.includes('youtu.be/')) return url.split('youtu.be/')[1].split(/[?#&]/)[0];
+    if(url.includes('youtube.com/embed/')) return url.split('youtube.com/embed/')[1].split(/[?#&]/)[0];
+    if(url.includes('v=')) return url.split('v=')[1].split('&')[0];
+    return '';
+}
+
+function processUrl(url, apiKey, type) {
+    url = cleanIframe(url);
+    if(!url) return "";
+    if(type === 'youtube') {
+        const vid = extractYoutubeId(url);
+        return vid ? `https://www.youtube.com/embed/${vid}` : url;
+    }
+    if(type === 'pdf' && url.includes('drive.google.com')) {
+        const match = url.match(/\/d\/([a-zA-Z0-9-_]{33,40})/);
+        if(match) return `https://drive.google.com/file/d/${match[1]}/preview`;
+    }
+    if(type === 'slide' && url.includes('docs.google.com/presentation')) {
+        const match = url.match(/\/presentation\/d\/([a-zA-Z0-9-_]{33,45})/);
+        if(match) return `https://docs.google.com/presentation/d/${match[1]}/embed?start=false&loop=false&delayms=3000`;
+    }
+    if(url.includes('drive.google.com') && !url.includes('googleapis.com') && apiKey) {
+        const match = url.match(/\/d\/([a-zA-Z0-9-_]{33,40})/);
+        if(match) return `https://www.googleapis.com/drive/v3/files/${match[1]}?alt=media&key=${apiKey}`;
+    }
+    return url;
+}
+
+function toggleInputs() {
+    const type = document.querySelector('input[name="formatType"]:checked').value;
+    const group = document.getElementById('groupPos2');
+    const input = document.getElementById('pos2');
+    const label = document.getElementById('labelPos1');
+    if(defaultLabelConfig[type]) {
+        document.getElementById('customBadgeText').value = defaultLabelConfig[type].text;
+        document.getElementById('badgeColorPicker').value = defaultLabelConfig[type].color;
+        document.getElementById('colorHexText').innerText = defaultLabelConfig[type].color.toUpperCase();
+    }
+    if(type === 'video' || type === 'hls' || type === 'audio' || type === 'stream') {
+        group.classList.remove('disabled');
+        input.disabled = false;
+        label.innerText = type === 'hls' || type === 'stream' ? "ลิงก์สตรีมมิ่ง (.m3u8/.mp4)" : "ลิงก์ไฟล์สื่อ";
+    } else {
+        group.classList.add('disabled');
+        input.disabled = true;
+        input.value = "";
+        label.innerText = "ลิงก์ไฟล์สื่อ";
+    }
+}
+
+function saveConfig() {
+    ['apiKey','schoolLogoUrl','headerBgUrl','teacherName','schoolName','areaName'].forEach(id => {
+        localStorage.setItem(id, document.getElementById(id).value.trim());
+    });
+    renderPlaylist();
+}
+
+function filterBackend() {
+    const keyword = document.getElementById('backendSearchInput').value.toLowerCase().trim();
+    const items = document.querySelectorAll('.visual-item');
+    items.forEach(item => {
+        const title = item.querySelector('.visual-item-title-input')?.value?.toLowerCase() || "";
+        const url = item.querySelector('.visual-item-url-input')?.value?.toLowerCase() || "";
+        item.style.display = (title.includes(keyword) || url.includes(keyword)) ? 'flex' : 'none';
+    });
+}
+
+function updateStorageProgress() {
+    try {
+        let totalUsed = 0;
+        const limit = 5 * 1024 * 1024;
+        for(let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if(key && (key.startsWith('playlist_') || key.startsWith('slot_') || key.startsWith('views_') || key.startsWith('likes_') || key.startsWith('my') || key.startsWith('draft_') || key === 'slotsConfig' || key === 'lastActiveSlot' || key === 'dark_mode' || key === 'nbm_dark_mode')) {
+                const value = localStorage.getItem(key);
+                totalUsed += value ? value.length * 2 : 0;
+            }
+        }
+        const percent = Math.min(100, (totalUsed / limit) * 100);
+        const percentEl = document.getElementById('storagePercent');
+        const progressEl = document.getElementById('storageProgress');
+        const usedEl = document.getElementById('storageUsed');
+        const warningEl = document.getElementById('storageWarning');
+        if(percentEl) percentEl.textContent = percent.toFixed(1) + '%';
+        if(progressEl) {
+            progressEl.style.width = percent + '%';
+            if(percent > 80) {
+                progressEl.style.background = 'linear-gradient(90deg, #ed8936, #e53e3e)';
+            } else if(percent > 60) {
+                progressEl.style.background = 'linear-gradient(90deg, #ecc94b, #ed8936)';
+            } else {
+                progressEl.style.background = 'linear-gradient(90deg, #48bb78, #38a169)';
+            }
+        }
+        if(usedEl) usedEl.textContent = (totalUsed / 1024).toFixed(1) + ' KB';
+        if(warningEl) {
+            warningEl.style.display = percent > 85 ? 'block' : 'none';
+        }
+        return { percent, usedKB: totalUsed / 1024 };
+    } catch(e) {
+        return { percent: 0, usedKB: 0 };
+    }
+}
+
+function exportData() {
+    if(playlistArray.length === 0) { alert("ไม่มีรายการให้ส่งออก"); return; }
+    try {
+        let csv = "";
+        playlistArray.forEach(item => {
+            const type = item.type || "video";
+            const title = item.title || "";
+            const src = item.src || "";
+            const poster = item.poster || "";
+            const attachment = item.attachment || "";
+            const label = item.label || defaultLabelConfig[type]?.text || type.toUpperCase();
+            const color = item.color || defaultLabelConfig[type]?.color || "#333333";
+            const attLabel = item.attachmentLabel || "เปิดดู";
+            csv += `${type},${title},${src},${poster},${attachment},${label},${color},${attLabel}\n`;
+        });
+        const encoded = btoa(unescape(encodeURIComponent(csv)));
+        document.getElementById('txtBackupBox').value = encoded;
+        document.getElementById('txtBackupBox').select();
+        document.execCommand('copy');
+        alert("✅ คัดลอกรหัสส่งออกแล้ว! (" + playlistArray.length + " รายการ)");
+    } catch(e) { alert("เกิดข้อผิดพลาด: " + e.message); }
+}
+
+function exportCSV() {
+    if(playlistArray.length === 0) { alert("ไม่มีรายการให้ส่งออก"); return; }
+    try {
+        let csv = "ประเภท,ชื่อบทเรียน,ลิงก์สื่อ,ปกสื่อ,ไฟล์แนบ,ป้ายข้อความ,สีป้าย,ชื่อปุ่มแนบ\n";
+        const escapeField = (field) => {
+            if(!field) return "";
+            const str = String(field);
+            if(str.includes(',') || str.includes('"') || str.includes('\n')) {
+                return '"' + str.replace(/"/g, '""') + '"';
+            }
+            return str;
+        };
+        playlistArray.forEach(item => {
+            const type = item.type || "video";
+            const title = item.title || "";
+            const src = item.src || "";
+            const poster = item.poster || "";
+            const attachment = item.attachment || "";
+            const label = item.label || defaultLabelConfig[type]?.text || type.toUpperCase();
+            const color = item.color || defaultLabelConfig[type]?.color || "#333333";
+            const attLabel = item.attachmentLabel || "เปิดดู";
+            csv += [
+                escapeField(type), escapeField(title), escapeField(src),
+                escapeField(poster), escapeField(attachment),
+                escapeField(label), escapeField(color), escapeField(attLabel)
+            ].join(',') + '\n';
+        });
+        const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        const slotName = slotsConfig.find(s => s.id === currentActiveSlotId)?.name || 'คลังสื่อ';
+        link.download = `คลังสื่อ_${slotName}_${new Date().toISOString().slice(0,10)}.csv`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(link.href);
+        alert("✅ ส่งออกไฟล์ CSV เรียบร้อย! (" + playlistArray.length + " รายการ)");
+    } catch(e) { alert("เกิดข้อผิดพลาด: " + e.message); }
+}
+
+function importData() {
+    if(isImporting) { alert("กำลังนำเข้าอยู่ กรุณารอสักครู่"); return; }
+    const text = document.getElementById('txtBackupBox').value.trim();
+    if(!text) { alert("⚠️ กรุณาวางรหัสกู้คืน หรือ CSV ในช่องก่อนครับ"); return; }
+    const statusEl = document.getElementById('importStatus');
+    statusEl.style.display = 'block';
+    statusEl.style.background = '#ebf8ff';
+    statusEl.style.color = '#2b6cb0';
+    statusEl.textContent = '⏳ กำลังเตรียมนำเข้า...';
+    isImporting = true;
+    setTimeout(() => {
+        try {
+            let tempArray = [];
+            let imported = 0;
+            try {
+                if(text.length > 30 && !text.includes(",") && !text.includes("\n")) {
+                    const decoded = decodeURIComponent(escape(atob(text)));
+                    if(decoded.includes(",") || decoded.includes("\n")) {
+                        const lines = decoded.split("\n");
+                        lines.forEach(line => {
+                            if(!line.trim()) return;
+                            const parts = line.split(",");
+                            if(parts.length >= 3) {
+                                const type = parts[0].trim().toLowerCase();
+                                const title = parts[1].trim();
+                                const src = cleanIframe(parts[2].trim());
+                                const poster = parts[3] ? parts[3].trim() : "";
+                                const attachment = parts[4] ? parts[4].trim() : "";
+                                const label = parts[5] ? parts[5].trim() : (defaultLabelConfig[type]?.text || type.toUpperCase());
+                                const color = parts[6] ? parts[6].trim() : (defaultLabelConfig[type]?.color || "#333333");
+                                let attLabel = parts[7] ? parts[7].trim() : "เปิดดู";
+                                if(!attLabel || attLabel === "") attLabel = "เปิดดู";
+                                if(defaultLabelConfig[type] || type === 'video' || type === 'hls' || type === 'stream') {
+                                    tempArray.push({ type, title, src, poster, attachment, label, color, attachmentLabel: attLabel });
+                                    imported++;
+                                }
+                            }
+                        });
+                    }
+                }
+            } catch(e) {}
+            if(imported === 0) {
+                const lines = text.split("\n");
+                lines.forEach(line => {
+                    if(!line.trim()) return;
+                    const parts = line.split(",");
+                    if(parts.length >= 3) {
+                        const type = parts[0].trim().toLowerCase();
+                        const title = parts[1].trim();
+                        const src = cleanIframe(parts[2].trim());
+                        const poster = parts[3] ? parts[3].trim() : "";
+                        const attachment = parts[4] ? parts[4].trim() : "";
+                        const label = parts[5] ? parts[5].trim() : (defaultLabelConfig[type]?.text || type.toUpperCase());
+                        const color = parts[6] ? parts[6].trim() : (defaultLabelConfig[type]?.color || "#333333");
+                        let attLabel = parts[7] ? parts[7].trim() : "เปิดดู";
+                        if(!attLabel || attLabel === "") attLabel = "เปิดดู";
+                        if(defaultLabelConfig[type] || type === 'video' || type === 'hls' || type === 'stream') {
+                            tempArray.push({ type, title, src, poster, attachment, label, color, attachmentLabel: attLabel });
+                            imported++;
+                        }
+                    }
+                });
+            }
+            if(imported === 0) {
+                statusEl.style.display = 'none';
+                isImporting = false;
+                alert("❌ ไม่พบข้อมูลที่ถูกต้อง\nรูปแบบ: ประเภท,ชื่อ,ลิงก์,ปก,ไฟล์แนบ,ป้าย,สี,ชื่อปุ่มแนบ");
+                return;
+            }
+            statusEl.textContent = `⏳ กำลังนำเข้า ${imported} รายการ... (0/${imported})`;
+            let index = 0;
+            const BATCH_SIZE = 10;
+            function addNextBatch() {
+                const end = Math.min(index + BATCH_SIZE, tempArray.length);
+                for(let i = index; i < end; i++) {
+                    playlistArray.push(tempArray[i]);
+                }
+                index = end;
+                statusEl.textContent = `⏳ กำลังนำเข้า ${imported} รายการ... (${index}/${imported})`;
+                if(index >= tempArray.length || index % 50 === 0) {
+                    currentPage = 0;
+                    renderPlaylist();
+                }
+                updateStorageProgress();
+                if(index < tempArray.length) {
+                    requestAnimationFrame(addNextBatch);
+                } else {
+                    currentPage = 0;
+                    renderPlaylist();
+                    statusEl.style.display = 'none';
+                    isImporting = false;
+                    document.getElementById('txtBackupBox').value = "";
+                    alert("✅ นำเข้าสำเร็จ " + imported + " รายการ!");
+                    updateStorageProgress();
+                }
+            }
+            addNextBatch();
+        } catch(e) {
+            statusEl.style.display = 'none';
+            isImporting = false;
+            alert("❌ นำเข้าไม่สำเร็จ: " + e.message);
+        }
+    }, 100);
+}
+
+function copyCode() {
+    const output = document.getElementById('output');
+    output.select();
+    output.setSelectionRange(0, 99999);
+    try {
+        document.execCommand('copy');
+        const alert = document.getElementById('successAlert');
+        alert.style.display = 'block';
+        setTimeout(() => alert.style.display = 'none', 3000);
+    } catch(e) {
+        alert("กรุณากด Ctrl+C เพื่อคัดลอกเอง");
+    }
+}
+
+function generateFullCode(itemsHTML) {
+    const logoUrl = document.getElementById('schoolLogoUrl').value.trim();
+    const bgUrl = document.getElementById('headerBgUrl').value.trim();
+    const teacher = document.getElementById('teacherName').value.trim() || "นายณัฐพล มีเวที";
+    const school = document.getElementById('schoolName').value.trim() || "โรงเรียนบ้านหนองม่วง";
+    const area = document.getElementById('areaName').value.trim() || "";
+    let headerBg = "background: linear-gradient(135deg, #002244, #003b6f);";
+    if(bgUrl) headerBg = `background-image: url('${bgUrl}'); background-size: cover; background-position: center;`;
+    let logoHtml = logoUrl ? `<img src="${logoUrl}" alt="Logo">` : "💻";
+
+    // ✅ เพิ่มเครดิตท้ายหน้า (Footer)
+    const footerCredit = `
+<div class="footer-credit">
+    © 2026 โรงเรียนบ้านหนองม่วง อ.ประโคนชัย &nbsp;|&nbsp; จัดทำโดย นายณัฐพล มีเวที
+</div>
+`;
+
+    return `<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>คลังสื่อ - ${escapeHtml(school)}</title>
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"><\/script>
+<script src="https://cdn.jsdelivr.net/npm/dashjs@latest/dist/dash.all.min.js"><\/script>
+<style>
+html, body { margin:0; padding:0; overflow-x:hidden !important; overflow-y:auto !important; scrollbar-width:none !important; -ms-overflow-style:none !important; }
+html::-webkit-scrollbar, body::-webkit-scrollbar { display:none !important; width:0 !important; height:0 !important; }
+.playlist { scrollbar-width:none !important; -ms-overflow-style:none !important; }
+.playlist::-webkit-scrollbar { display:none !important; width:0 !important; height:0 !important; }
+* { scrollbar-width:none !important; -ms-overflow-style:none !important; }
+*::-webkit-scrollbar { display:none !important; width:0 !important; height:0 !important; }
+* { box-sizing: border-box; font-family: 'Prompt', sans-serif !important; }
+html, body { margin: 0; padding: 0; background: #f4f7fb; }
+body.dark-mode { background: #121212; color: #e0e0e0; }
+.container { max-width: 1550px; margin: auto; padding: 15px; }
+.header { ${headerBg} border-bottom: 4px solid #d4af37; border-radius: 14px 14px 0 0; padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; color: #fff; }
+.header-left { display: flex; align-items: center; gap: 15px; }
+.header-icon { width: 52px; height: 52px; border-radius: 50%; display: flex; justify-content: center; align-items: center; background: rgba(255,255,255,.15); font-size: 28px; color: #ffd700; overflow: hidden; }
+.header-icon img { width: 100%; height: 100%; object-fit: cover; }
+.header-title { margin: 0; font-size: 20px; font-weight: 700; }
+.header-sub { margin-top: 3px; font-size: 13px; opacity: .88; }
+.header-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.search-box { width: 260px; padding: 10px 14px; border: none; border-radius: 8px; background: rgba(255,255,255,.16); color: #fff; outline: none; }
+.search-box::placeholder { color: #d6e6ff; }
+.search-box:focus { background: #fff; color: #002244; }
+.toggle-btn { width: 44px; height: 44px; border: none; border-radius: 10px; background: rgba(255,255,255,.16); color: #ffd700; font-size: 20px; cursor: pointer; }
+.main { display: flex; background: #fff; border-radius: 0 0 14px 14px; overflow: hidden; border: 1px solid #d2e4d2; border-top: none; }
+.dark-mode .main { background: #1e1e1e; border-color: #333; }
+.player-side { flex: 1; background: #000; position: relative; height: 720px; display: flex; flex-direction: column; overflow: hidden; }
+.now-playing-bar { background: rgba(255,255,255,0.95); padding: 12px 20px; border-bottom: 2px solid #ffd700; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; z-index: 10; }
+.dark-mode .now-playing-bar { background: rgba(30,30,30,0.95); border-bottom-color: #d4af37; }
+.now-playing-label { font-size: 11px; font-weight: bold; color: #002244; text-transform: uppercase; border-right: 2px solid #ccc; padding-right: 10px; }
+.dark-mode .now-playing-label { color: #ffd700; border-right-color: #555; }
+.now-playing-title { font-size: 15px; font-weight: bold; color: #163c69; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; min-width: 80px; }
+.dark-mode .now-playing-title { color: #fff; }
+.now-playing-badge { padding: 3px 8px; border-radius: 4px; color: #fff; font-size: 10px; font-weight: 700; }
+.nav-btn { background: #1e88e5; color: #fff; border: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer; }
+.nav-btn:hover { background: #1565c0; }
+.attachment-btn { display: inline-flex; align-items: center; gap: 6px; background: #27ae60; color: #fff; border: none; padding: 6px 14px; border-radius: 6px; font-size: 13px; font-weight: bold; text-decoration: none; cursor: pointer; }
+.stats-badge { display: inline-flex; align-items: center; gap: 4px; background: #edf2f7; padding: 5px 10px; border-radius: 6px; font-size: 12px; font-weight: bold; }
+.dark-mode .stats-badge { background: #2d3748; color: #e2e8f0; }
+.like-btn { display: inline-flex; align-items: center; gap: 4px; background: #fff0f5; color: #e53e3e; border: 1px solid #feb2b2; padding: 5px 10px; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer; }
+.player-container { flex: 1; position: relative; display: flex; justify-content: center; align-items: center; background: #000; width: 100%; height: 100%; }
+.player-container video, .player-container iframe { width: 100%; height: 100%; position: absolute; top: 0; left: 0; border: none; display: none; object-fit: contain; }
+.audio-box { display: none; width: 100%; height: 100%; position: relative; flex-direction: column; justify-content: center; align-items: center; padding: 40px; background-size: cover; background-position: center; }
+.audio-box::before { content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.55); z-index: 1; }
+.dark-mode .audio-box::before { background: rgba(20,20,20,0.88); }
+.audio-content-wrapper { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center; width: 85%; max-width: 800px; background: rgba(255,230,240,0.9); padding: 40px; border-radius: 16px; }
+.dark-mode .audio-content-wrapper { background: rgba(40,40,40,0.92); }
+.audio-cover { width: 600px; height: 300px; margin-bottom: 20px; border-radius: 12px; display: flex; justify-content: center; align-items: center; background: linear-gradient(135deg, #1565c0, #42a5f5); color: #fff; font-size: 72px; background-size: cover; background-position: center; }
+.audio-title { font-size: 18px; font-weight: 600; color: #163c69; margin-bottom: 18px; }
+.dark-mode .audio-title { color: #ffd700; }
+#audioPlayer { width: 100%; }
+.playlist-side { width: 380px; background: #f0f9f0; border-left: 1px solid #d2e4d2; display: flex; flex-direction: column; }
+.dark-mode .playlist-side { background: #1a231a; border-left-color: #333; }
+.playlist-hidden .playlist-side { display: none; }
+.playlist { overflow-y: auto; height: 720px; }
+
+/* ===== แถบปุ่มสลับโหมด ===== */
+.view-toggle-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    background: #f0f9f0;
+    border-bottom: 1px solid #d2e4d2;
+}
+.view-toggle-bar .title {
+    font-size: 13px;
+    font-weight: bold;
+    color: #2b6cb0;
+}
+.view-toggle-btn {
+    background: #4299e1;
+    color: #fff;
+    border: none;
+    padding: 4px 14px;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background 0.3s;
+}
+.view-toggle-btn:hover { opacity: 0.85; }
+.view-toggle-btn.text-mode { background: #38a169; }
+.view-toggle-btn.image-mode { background: #4299e1; }
+
+/* ===== โหมดภาพ (ค่าเริ่มต้น) ===== */
+.playlist.image-mode .item .item-thumb { display: block !important; }
+.playlist.image-mode .item .item-sub { display: block !important; }
+.playlist.image-mode .item .badge { display: inline-block !important; }
+.playlist.image-mode .item { gap: 12px !important; padding: 10px 12px !important; }
+
+/* ===== โหมดข้อความ (แบบมี ▶ และป้ายสี) ===== */
+.playlist.text-mode .item .item-thumb { display: none !important; }
+.playlist.text-mode .item .item-sub { display: none !important; }
+.playlist.text-mode .item { 
+    gap: 8px !important; 
+    padding: 8px 14px !important; 
+    border-bottom: 1px solid #e8e8e8 !important;
+}
+.playlist.text-mode .item .item-text { 
+    font-size: 14px !important; 
+    font-weight: 500 !important;
+    flex: 1 !important;
+}
+.playlist.text-mode .item .badge { 
+    display: inline-block !important; 
+    flex-shrink: 0 !important;
+    margin-left: auto !important;
+    font-size: 11px !important;
+    padding: 2px 12px !important;
+    border-radius: 20px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.5px !important;
+}
+.playlist.text-mode .item .item-text::before {
+    content: "▶ ";
+    color: #333;
+    font-size: 11px;
+}
+.playlist.text-mode .item:not(:last-child) {
+    border-bottom: 1px solid #e8e8e8 !important;
+}
+.playlist.text-mode .item:hover {
+    background: #e8f0e8 !important;
+}
+.dark-mode .playlist.text-mode .item {
+    border-bottom-color: #2e3b2e !important;
+}
+.dark-mode .playlist.text-mode .item:hover {
+    background: #253525 !important;
+}
+
+/* ===== CSS สำหรับ Footer ===== */
+.footer-credit {
+    text-align: center;
+    padding: 16px 20px;
+    font-size: 13px;
+    color: #4a5568;
+    border-top: 2px solid #d4af37;
+    background: linear-gradient(135deg, #f7fafc, #edf2f7);
+    margin-top: 10px;
+    border-radius: 0 0 14px 14px;
+}
+.dark-mode .footer-credit {
+    background: linear-gradient(135deg, #1a1a2e, #16213e);
+    color: #a0aec0;
+    border-top-color: #d4af37;
+}
+
+.item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    cursor: pointer;
+    border-bottom: 1px solid #e8e8e8;
+    transition: background 0.2s;
+    background: #f0f9f0;
+}
+.item:hover { background: #ddf0dd; }
+.item.active { background: #fce4ec; border-left: 6px solid #c0266f; }
+.item-thumb { width: 120px; height: 68px; border-radius: 6px; object-fit: cover; background: #e0e0e0; flex-shrink: 0; }
+.item-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.item-text { font-size: 14px; color: #243424; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.item-sub { font-size: 12px; color: #888; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.item.active .item-text { color: #61164f; font-weight: 700; }
+.item.active .item-sub { color: #8a5a7a; }
+.badge { font-size: 10px; padding: 2px 10px; border-radius: 12px; color: #fff; flex-shrink: 0; }
+.dark-mode .item { background: #1a231a; border-bottom-color: #2e3b2e; }
+.dark-mode .item:hover { background: #253525; }
+.dark-mode .item.active { background: #3d2331; border-left-color: #c0266f; }
+.dark-mode .item-text { color: #ccc; }
+.dark-mode .item-sub { color: #999; }
+.dark-mode .item.active .item-text { color: #ff80df; }
+.dark-mode .item.active .item-sub { color: #cc99bb; }
+.no-result { display: none; padding: 30px; text-align: center; color: #666; }
+video::-webkit-media-controls-enclosure { opacity: 0 !important; transition: opacity 0.3s ease !important; }
+video:hover::-webkit-media-controls-enclosure { opacity: 1 !important; }
+video::-moz-media-controls { opacity: 0 !important; transition: opacity 0.3s ease !important; }
+video:hover::-moz-media-controls { opacity: 1 !important; }
+
+/* Image Viewer Full Cover */
+#imageViewer {
+    display: none;
+    width: 100%;
+    height: 100%;
+    background: #000;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    flex-direction: column;
+}
+#imageDisplay {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    cursor: pointer;
+    display: none;
+}
+#imageLoading {
+    color: #fff;
+    font-size: 20px;
+    z-index: 10;
+    position: absolute;
+}
+#imageError {
+    display: none;
+    color: #f88;
+    font-size: 16px;
+    text-align: center;
+    padding: 20px;
+}
+</style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <div class="header-left">
+            <div class="header-icon">${logoHtml}</div>
+            <div>
+                <h1 class="header-title">คลังสื่อการสอน ของ${escapeHtml(teacher)}</h1>
+                <div class="header-sub">${escapeHtml(school)} ${escapeHtml(area)}</div>
+            </div>
+        </div>
+        <div class="header-right">
+            <input type="text" id="searchBox" class="search-box" placeholder="🔍 ค้นหา...">
+            <button class="toggle-btn" id="themeBtn">🌓</button>
+            <button class="toggle-btn" id="toggleBtn">⛶</button>
+        </div>
+    </div>
+    <div class="main" id="mainWrapper">
+        <div class="player-side">
+            <div class="now-playing-bar">
+                <button class="nav-btn" id="prevBtn">◀ ก่อนหน้า</button>
+                <span class="now-playing-label">Now Playing</span>
+                <span class="now-playing-title" id="nowPlayingTitle">เลือกรายการ</span>
+                <span class="now-playing-badge" id="nowPlayingBadge" style="display:none;">-</span>
+                <a href="#" target="_blank" class="attachment-btn" id="attachmentBtn">📝 <span id="attachmentBtnText">เปิดดู</span></a>
+                <div class="stats-badge" id="viewCountBadge">👁️ 0</div>
+                <button class="like-btn" id="likeBtn">❤️ <span id="likeCountText">0</span></button>
+                <button class="nav-btn" id="nextBtn">ถัดไป ▶</button>
+            </div>
+            <div class="player-container">
+                <video id="videoPlayer" controls controlsList="nodownload" preload="metadata"></video>
+                <iframe id="embedPlayer" allow="autoplay; encrypted-media; vr" allowfullscreen></iframe>
+                <div class="audio-box" id="audioBox">
+                    <div class="audio-content-wrapper">
+                        <div class="audio-cover" id="audioCoverEl">🎵</div>
+                        <div class="audio-title" id="audioTitle">ไฟล์เสียง</div>
+                        <audio id="audioPlayer" controls controlsList="nodownload"></audio>
+                    </div>
+                </div>
+                <div id="imageViewer">
+                    <div id="imageLoading">⏳ กำลังโหลด...</div>
+                    <img id="imageDisplay" alt="รูปภาพ" />
+                    <div id="imageError">❌ ไม่สามารถโหลดรูปภาพได้</div>
+                </div>
+            </div>
+        </div>
+        <div class="playlist-side">
+            <!-- ===== แถบปุ่มสลับโหมด ===== -->
+            <div class="view-toggle-bar">
+                <span class="title">📋 รายการสื่อ</span>
+                <button class="view-toggle-btn image-mode" id="toggleViewBtn">🖼️ มุมมองภาพ</button>
+            </div>
+            <div class="playlist image-mode" id="playlist">
+${itemsHTML}
+                <div class="no-result" id="noResult">❌ ไม่พบรายการ</div>
+            </div>
+        </div>
+    </div>
+</div>
+${footerCredit}
+<script>
+const mainWrapper = document.getElementById('mainWrapper');
+const toggleBtn = document.getElementById('toggleBtn');
+const themeBtn = document.getElementById('themeBtn');
+const videoPlayer = document.getElementById('videoPlayer');
+const embedPlayer = document.getElementById('embedPlayer');
+const audioBox = document.getElementById('audioBox');
+const audioPlayer = document.getElementById('audioPlayer');
+const audioTitle = document.getElementById('audioTitle');
+const audioCoverEl = document.getElementById('audioCoverEl');
+const searchBox = document.getElementById('searchBox');
+const noResult = document.getElementById('noResult');
+const nowPlayingTitle = document.getElementById('nowPlayingTitle');
+const nowPlayingBadge = document.getElementById('nowPlayingBadge');
+const attachmentBtn = document.getElementById('attachmentBtn');
+const attachmentBtnText = document.getElementById('attachmentBtnText');
+const viewCountBadge = document.getElementById('viewCountBadge');
+const likeBtn = document.getElementById('likeBtn');
+const likeCountText = document.getElementById('likeCountText');
+const prevBtn = document.getElementById('prevBtn');
+const nextBtn = document.getElementById('nextBtn');
+const imageViewer = document.getElementById('imageViewer');
+const imageDisplay = document.getElementById('imageDisplay');
+const imageLoading = document.getElementById('imageLoading');
+const imageError = document.getElementById('imageError');
+
+// ===== ระบบสลับโหมดแสดงผล =====
+const playlistEl = document.getElementById('playlist');
+const toggleViewBtn = document.getElementById('toggleViewBtn');
+
+let currentViewMode = localStorage.getItem('playlist_view_mode') || 'image';
+
+function applyViewMode(mode) {
+    if (!playlistEl || !toggleViewBtn) return;
+    
+    playlistEl.classList.remove('text-mode', 'image-mode');
+    
+    if (mode === 'text') {
+        playlistEl.classList.add('text-mode');
+        toggleViewBtn.textContent = '📝 มุมมองข้อความ';
+        toggleViewBtn.className = 'view-toggle-btn text-mode';
+    } else {
+        playlistEl.classList.add('image-mode');
+        toggleViewBtn.textContent = '🖼️ มุมมองภาพ';
+        toggleViewBtn.className = 'view-toggle-btn image-mode';
+    }
+    localStorage.setItem('playlist_view_mode', mode);
+    currentViewMode = mode;
+}
+
+if (toggleViewBtn) {
+    toggleViewBtn.onclick = function() {
+        const newMode = currentViewMode === 'image' ? 'text' : 'image';
+        applyViewMode(newMode);
+    };
+}
+
+// ใช้โหมดที่บันทึกไว้
+applyViewMode(currentViewMode);
+// ===== จบส่วนสลับโหมด =====
+
+let hlsPlayer = null, dashPlayer = null;
+let currentImageSrc = '';
+
+themeBtn.onclick = () => {
+    document.body.classList.toggle('dark-mode');
+    localStorage.setItem('dark_mode', document.body.classList.contains('dark-mode') ? 'on' : 'off');
+};
+
+toggleBtn.onclick = () => {
+    mainWrapper.classList.toggle('playlist-hidden');
+    toggleBtn.textContent = mainWrapper.classList.contains('playlist-hidden') ? '▶' : '⛶';
+};
+
+function resetPlayers() {
+    videoPlayer.pause();
+    videoPlayer.removeAttribute('src');
+    videoPlayer.removeAttribute('poster');
+    videoPlayer.load();
+    videoPlayer.style.display = 'none';
+    embedPlayer.style.display = 'none';
+    embedPlayer.src = '';
+    audioBox.style.display = 'none';
+    if(audioPlayer) { audioPlayer.pause(); audioPlayer.src = ''; }
+    if(hlsPlayer) { hlsPlayer.destroy(); hlsPlayer = null; }
+    if(dashPlayer) { dashPlayer.reset(); dashPlayer = null; }
+
+    imageViewer.style.display = 'none';
+    imageDisplay.style.display = 'none';
+    imageDisplay.src = '';
+    imageLoading.style.display = 'none';
+    imageError.style.display = 'none';
+    currentImageSrc = '';
+}
+
+function navigate(direction) {
+    const items = Array.from(document.querySelectorAll('.item')).filter(i => i.style.display !== 'none');
+    if(!items.length) return;
+    let idx = items.findIndex(i => i.classList.contains('active'));
+    if(idx < 0) idx = 0;
+    idx += direction;
+    if(idx < 0) idx = 0;
+    if(idx >= items.length) idx = items.length - 1;
+    items[idx].click();
+    items[idx].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+prevBtn.onclick = () => navigate(-1);
+nextBtn.onclick = () => navigate(1);
+
+function bindPlaylist() {
+    document.querySelectorAll('.item').forEach(item => {
+        item.onclick = function() {
+            document.querySelectorAll('.item').forEach(i => i.classList.remove('active'));
+            this.classList.add('active');
+
+            const type = this.dataset.type || 'video';
+            const src = this.dataset.src || '';
+            const id = this.dataset.id || 'id_' + Date.now();
+            const poster = this.dataset.poster || '';
+            const attachment = this.dataset.attachment || src;
+            const attLabel = this.dataset.attlabel || 'เปิดดู';
+            const title = this.querySelector('.item-text')?.textContent || 'ไม่พบชื่อ';
+            const badge = this.querySelector('.badge');
+
+            const cleanTitle = title.replace(/^▶\\s*\\d+\\.\\s*/i, '').trim();
+            nowPlayingTitle.textContent = cleanTitle;
+
+            if(badge) {
+                nowPlayingBadge.textContent = badge.textContent.trim();
+                nowPlayingBadge.style.backgroundColor = badge.style.backgroundColor;
+                nowPlayingBadge.style.display = 'inline-block';
+            } else {
+                nowPlayingBadge.style.display = 'none';
+            }
+
+            if(attachment && attachment.trim()) {
+                attachmentBtn.href = attachment.trim();
+                attachmentBtnText.textContent = attLabel || 'เปิดดู';
+                attachmentBtn.style.display = 'inline-flex';
+            } else {
+                attachmentBtn.href = src;
+                attachmentBtnText.textContent = 'เปิดดู';
+                attachmentBtn.style.display = 'inline-flex';
+            }
+
+            let views = parseInt(localStorage.getItem('views_' + id) || '0') + 1;
+            localStorage.setItem('views_' + id, views);
+            viewCountBadge.textContent = '👁️ ' + views;
+
+            let likes = parseInt(localStorage.getItem('likes_' + id) || '0');
+            likeCountText.textContent = likes;
+
+            resetPlayers();
+
+            const isHLS = src.toLowerCase().includes('.m3u8');
+            const isDASH = src.toLowerCase().includes('.mpd');
+
+            if(poster && (type === 'video' || type === 'hls' || type === 'stream')) {
+                videoPlayer.poster = poster;
+                videoPlayer.load();
+            }
+
+            if (type === 'video' || type === 'hls' || type === 'stream' || isHLS || isDASH) {
+                videoPlayer.style.display = 'block';
+                if(isDASH && typeof dashjs !== 'undefined') {
+                    dashPlayer = dashjs.MediaPlayer().create();
+                    dashPlayer.initialize(videoPlayer, src, true);
+                } else if(isHLS && typeof Hls !== 'undefined' && Hls.isSupported()) {
+                    hlsPlayer = new Hls();
+                    hlsPlayer.loadSource(src);
+                    hlsPlayer.attachMedia(videoPlayer);
+                    hlsPlayer.on(Hls.Events.MANIFEST_PARSED, () => videoPlayer.play().catch(() => {}));
+                } else {
+                    videoPlayer.src = src;
+                    videoPlayer.play().catch(() => {});
+                }
+            } else if (type === 'audio') {
+                audioBox.style.display = 'flex';
+                audioTitle.textContent = "🎵 " + cleanTitle;
+                if(poster) {
+                    audioBox.style.backgroundImage = \`url('\${poster}')\`;
+                    audioCoverEl.style.backgroundImage = \`url('\${poster}')\`;
+                    audioCoverEl.textContent = "";
+                } else {
+                    audioBox.style.backgroundImage = "none";
+                    audioCoverEl.style.backgroundImage = "none";
+                    audioCoverEl.textContent = "🎵";
+                }
+                audioPlayer.src = src;
+                audioPlayer.load();
+                audioPlayer.play().catch(() => {});
+            } else if (type === 'image') {
+                imageViewer.style.display = 'flex';
+                imageLoading.style.display = 'block';
+                imageError.style.display = 'none';
+                imageDisplay.style.display = 'none';
+                imageDisplay.src = '';
+
+                const img = new Image();
+                const loadSrc = src;
+                currentImageSrc = loadSrc;
+                img.crossOrigin = 'anonymous';
+                img.onload = function() {
+                    if (currentImageSrc !== loadSrc) return;
+                    imageDisplay.src = this.src;
+                    imageDisplay.style.display = 'block';
+                    imageLoading.style.display = 'none';
+                    imageError.style.display = 'none';
+                };
+                img.onerror = function() {
+                    if (currentImageSrc !== loadSrc) return;
+                    imageLoading.style.display = 'none';
+                    imageError.style.display = 'block';
+                    imageDisplay.style.display = 'none';
+                    if (poster && poster.trim()) {
+                        imageDisplay.src = poster;
+                        imageDisplay.style.display = 'block';
+                        imageError.style.display = 'none';
+                    } else {
+                        imageError.innerHTML = '❌ ไม่สามารถโหลดรูปภาพได้<br><small>' + loadSrc + '</small>';
+                    }
+                };
+                img.src = loadSrc;
+
+                imageDisplay.onclick = function() {
+                    const target = (attachment && attachment.trim()) ? attachment : src;
+                    window.open(target, '_blank');
+                };
+                imageViewer.onclick = function(e) {
+                    if (e.target === imageViewer || e.target === imageLoading) {
+                        const target = (attachment && attachment.trim()) ? attachment : src;
+                        window.open(target, '_blank');
+                    }
+                };
+            } else {
+                embedPlayer.style.display = 'block';
+                embedPlayer.src = src;
+            }
+        };
+    });
+}
+
+likeBtn.onclick = () => {
+    const active = document.querySelector('.item.active');
+    if(!active) return;
+    const id = active.dataset.id;
+    let likes = parseInt(localStorage.getItem('likes_' + id) || '0') + 1;
+    localStorage.setItem('likes_' + id, likes);
+    likeCountText.textContent = likes;
+};
+
+searchBox.oninput = function() {
+    const keyword = this.value.toLowerCase().trim();
+    const items = document.querySelectorAll('.item');
+    let visible = 0;
+    items.forEach(item => {
+        const text = item.textContent.toLowerCase();
+        if(text.includes(keyword)) { item.style.display = 'flex'; visible++; }
+        else { item.style.display = 'none'; }
+    });
+    noResult.style.display = visible === 0 ? 'block' : 'none';
+};
+
+window.onload = function() {
+    if(localStorage.getItem('dark_mode') === 'on') document.body.classList.add('dark-mode');
+    bindPlaylist();
+    const first = document.querySelector('.item');
+    if(first) first.click();
+};
+<\/script>
+</body>
+</html>`;
+}
+</script>
+</body>
+</html>
